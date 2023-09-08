@@ -1,0 +1,32 @@
+Input Files:
+AUM-By-Product-5-19-2023_BravoJohnny
+Client-Summary-5-19-2023_BravoJohnny
+RevenuebyClient-2023-05-19_1507-12_BravoJohnny
+
+Outputs required:
+Date_Informal_Valuation_BravoJohnny
+Date_RevenueEstimates_BravoJohnny
+
+Output Date_Informal_Valuation_BravoJohnny
+
+This is a .csv file that has the following columns: Client Name,ClientAge,AUM,YearsWFirm,GrossRecurringRevenue,GrossBrokerageCommissions
+There will be a row for each client. The final row will have the following: AverageClientAge,SUMofAUM,AverageYearsWFirm,SumGrossRecurringRevenue,SumGrossBrokerageCommissions
+
+Information from: 
+Client Name -- RevenuebyClient and Client-Summary
+ClientAge -- Client-Summary (Birthday given)
+AUM (Assets Under Management) -- CLientSummary column D
+YearsWFirm -- Client-Summary
+GrossRecurringRevenue -- RevenuebyClient
+GrossBrokerageCommissions -- RevenuebyClient
+(column D on AUM Finish spread sheet. Col H is D*E for row 3 and 6 and then add them together. Multiply H * 2.8 for 3 and then multiply H * 1 for row 6 and then add them together) (Display this at the top)
+
+Output Date_GDC_Summary_By_LineofBusiness
+
+This will be a .csv file that will show the following:
+
+Total Revenue broken down between %GrossRecurringRevenue and %GrossBrokerageRevenue
+Estimated Gross Value which will be the SUM of GrossRecurringRevenue x Multiples and GrossBrokerageRevenue x Multiples 
+
+Information from: 
+revenure by client -- column H is GrossRecurringRevenue and column F is GrossBrokerageCommissions sum both of them and then add them together. f/j GrossBrokerageCommissions% is and h/j GrossRecurringRevenue%
