@@ -2,20 +2,19 @@ import pandas as pd
 from datetime import datetime
 from fuzzywuzzy import fuzz
 import re
-import numpy as np
 
 # Define a function to preprocess names
 def preprocess_name(name):
     return re.sub(r'[^\w\s]', '', name.lower())
 
-advisor_name = 'Sterling'
+advisor_name = 'Change the name here'
 current_date = datetime.now().strftime("%m-%d-%Y")
 current_year = datetime.now().year
 output_file = f"Informal-Value-Exact-{current_date}-{advisor_name}.csv"
 
 # Load data
-client_summary_df = pd.read_csv("Client-Summary-8-17-2023-Sterling.csv")
-revenue_by_client_df = pd.read_csv('RevenuebyClient-2023-08-17_10-31-39_Sterling.csv')
+client_summary_df = pd.read_csv("change file directory here")
+revenue_by_client_df = pd.read_csv('change file directory here')
 revenue_by_client_df['Group Browse Client Name'] = revenue_by_client_df['Group Browse Client Name'].astype(str)
 revenue_by_client_df.drop(revenue_by_client_df.index[-1], inplace=True)
 # Exclude rows where 'Client Since' is NaN or 'Client Type' is 'Prospect'
