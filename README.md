@@ -1,4 +1,4 @@
-# Advisor-Valuation
+# Advisor-Valuation-Run-Guide
 This is an outline of using this python code to quickly do some data manipulation for Advisor Valuations. Do the following steps to be able to run the code
 #### 1. Install the following python packages if you dont have them already:
   - pandas
