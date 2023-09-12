@@ -14,7 +14,7 @@ output_file = f"Informal-Value-Exact-{current_date}-{advisor_name}.csv"
 
 # Load data
 client_summary_df = pd.read_csv("change file directory here")
-revenue_by_client_df = pd.read_csv('change file directory here')
+revenue_by_client_df = pd.read_csv("change file directory here")
 revenue_by_client_df['Group Browse Client Name'] = revenue_by_client_df['Group Browse Client Name'].astype(str)
 revenue_by_client_df.drop(revenue_by_client_df.index[-1], inplace=True)
 # Exclude rows where 'Client Since' is NaN or 'Client Type' is 'Prospect'
@@ -31,7 +31,7 @@ def clean_and_convert(value):
     return value
 
 # List of columns to be summed
-columns_to_sum = ['Total Assets', 'Net Advisory Revenue', 'Net Trails', 'Net Brokerage Commissions', 'Gross Revenue']
+columns_to_sum = ['Total Assets', 'Net Advisory Revenue', 'Net Trails', 'Net Brokerage Commissions', 'Gross Revenue', 'Net Revenue']
 
 # Convert columns to numeric
 for col in columns_to_sum:
@@ -133,7 +133,7 @@ merged_df['original_order'] = range(len(merged_df))
 # Sort by 'Client/Household Name', 'HH AUM', and 'Recurring Revenue'
 merged_df.sort_values(by=['Client/Household Name', 'HH AUM', 'Recurring Revenue'], ascending=[True, True, True], inplace=True)
 # Drop duplicates based on 'Client/Household Name' and 'HH AUM', keep the first 
-merged_df.drop_duplicates(subset=['Client/Household Name', 'HH AUM', 'Recurring Revenue'], keep='first', inplace=True)
+merged_df.drop_duplicates(subset=['Client/Household Name', 'HH AUM', 'Recurring Revenue', 'Client SSN / TIN'], keep='first', inplace=True)
 # Sort back by the original order and drop the 'original_order' column
 merged_df.sort_values(by='original_order', inplace=True)
 merged_df.drop(columns=['original_order'], inplace=True)
@@ -218,7 +218,7 @@ desired_columns = ['Client/Household Name', 'Age', 'Average Age', 'AUM Weighted 
 merged_df['Gross Value'] = pd.to_numeric(merged_df['Gross Value'], errors='coerce')
 merged_df['Recurring Revenue'] = pd.to_numeric(merged_df['Recurring Revenue'], errors='coerce')
 merged_df['Non-Recurring Revenue'] = pd.to_numeric(merged_df['Non-Recurring Revenue'], errors='coerce')
-merged_df['Net Revenue'] = pd.to_numeric(merged_df['Net Revenue'].str.replace(',', ''), errors='coerce')
+merged_df['Net Revenue'] = pd.to_numeric(merged_df['Net Revenue'], errors='coerce')
 # Calculate the required values
 Total_AUM = pd.to_numeric(merged_df['HH AUM'], errors='coerce').sum()
 Total_AUM = '${:,.2f}'.format(Total_AUM)
