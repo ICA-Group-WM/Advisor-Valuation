@@ -2,6 +2,12 @@ import pandas as pd
 from datetime import datetime
 from fuzzywuzzy import fuzz
 import re
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.colors import HexColor
 
 # Define a function to preprocess names
 def preprocess_name(name):
@@ -27,8 +33,13 @@ revenue_by_client_df['Preprocessed Name'] = revenue_by_client_df['Group Browse C
 # List of columns to be summed
 def clean_and_convert(value):
     if isinstance(value, str):
-        return float(value.replace(',', '').replace('(', '').replace(')', ''))
+        if value.startswith('(') and value.endswith(')'):
+            value = value[1:-1]  # Remove the parentheses
+            return float(value.replace(',', '')) * -1  # Convert to negative float
+        else:
+            return float(value.replace(',', ''))  # Convert to float
     return value
+
 
 # List of columns to be summed
 columns_to_sum = ['Total Assets', 'Net Advisory Revenue', 'Net Trails', 'Net Brokerage Commissions', 'Gross Revenue', 'Net Revenue']
@@ -191,8 +202,8 @@ def calculate_non_recurring_adjusted_multiple():
         adjusted_multiple -= 0.2
     return adjusted_multiple
 
-Recurring_Rev_Adjusted_Multiple = calculate_recurring_adjusted_multiple()
-Non_Recurring_Adjusted_Rev_Multiple = calculate_non_recurring_adjusted_multiple()
+Recurring_Rev_Adjusted_Multiple = round(calculate_recurring_adjusted_multiple(), 2)
+Non_Recurring_Adjusted_Rev_Multiple = round(calculate_non_recurring_adjusted_multiple(), 2)
 
 
 def calculate_gross_value(row):
@@ -232,6 +243,10 @@ Advisory_Trails = round((merged_df['Net Trails'].sum() + merged_df['Net Advisory
 Brokerage_Times_NetAdRev = Brokerage * merged_df['Gross Revenue'].sum()
 Advisory_Trails_Times_NetAdRev = Advisory_Trails * merged_df['Gross Revenue'].sum()
 Total_Revenue = Brokerage_Times_NetAdRev + Advisory_Trails_Times_NetAdRev
+Brokerage = Brokerage*100
+Advisory_Trails = Advisory_Trails * 100
+Brokerage_Times_NetAdRev = "${:,.2f}".format(Brokerage_Times_NetAdRev)
+Advisory_Trails_Times_NetAdRev = "${:,.2f}".format(Advisory_Trails_Times_NetAdRev)
 Total_Revenue = "${:,.2f}".format(Total_Revenue)
 def to_money_format(x):
     return '${:,.2f}'.format(x)
@@ -263,8 +278,8 @@ calculation_data = {
     'AUM Weighted average age': [Recurring_Rev_Multiple, Non_Recurring_Multiple, Recurring_Rev_Adjusted_Multiple, Non_Recurring_Adjusted_Rev_Multiple],
     'Client Since': ['Risk Adjustment: Proactive Service Model', 'Risk Adjustment: Reactive Service Model', 'Risk Adjustment: <5% YOY Growth last 3'],
     'Years with Firm': [proactive_Service_Model, reactive_Service_Model, growth_Last_3_Years],
-    'HH AUM': ['Brokerage', 'Advisory Trails Revenue', 'Brokerage * Gross Revenue', 'Advisory Trails * Gross Revenue'],
-    'Recurring Revenue': [Brokerage, Advisory_Trails, Brokerage_Times_NetAdRev, Advisory_Trails_Times_NetAdRev]
+    'HH AUM': ['Brokerage Revenue', 'Advisory Trails Revenue', 'Brokerage * Gross Revenue', 'Advisory Trails * Gross Revenue'],
+    'Recurring Revenue': [f'{Brokerage:.2f}%', f'{Advisory_Trails:.2f}%', Brokerage_Times_NetAdRev, Advisory_Trails_Times_NetAdRev]
 }
 # Find the max length
 max_length = max(len(value) for value in calculation_data.values())
@@ -274,8 +289,57 @@ for key, value in calculation_data.items():
     if len(value) < max_length:
         calculation_data[key] = value + [None] * (max_length - len(value))
 
+calculation_output_filename = f"Advisor-Valuation-Summary-{advisor_name}.pdf"
 calculation_df = pd.DataFrame(calculation_data)
 merged_df = pd.concat([merged_df, calculation_df], ignore_index=True)
+def export_to_pdf(data, advisor_name):
+    pdf = SimpleDocTemplate(
+        calculation_output_filename,
+        pagesize=letter
+    )
+
+    # container for the 'Flowable' objects
+    elements = []
+
+    # Add title
+    styles = getSampleStyleSheet()
+    title = Paragraph(f"{advisor_name} Summary values:", styles['Title'])
+    elements.append(title)
+
+    # Prepare data for Table
+    table_data = []
+    
+    keys = ['Total AUM', 'Total Revenue', 'Informal Gross Valuation', 'Informal Adjusted Valuation', 
+            '% of Revenue Recurring', '% of Revenue Non-Recurring', 'Recurring Revenue Multiple', 'Non-Recurring Revenue Multiple', 'Recurring Revenue Adjusted Multiple', 
+            'Non-Recurring Revenue Adjusted Multiple', 'Risk Adjustment: Proactive Service Model', 'Risk Adjustment: Reactive Service Model', 'Risk Adjustment: <5% YOY Growth last 3',
+            'Brokerage Revenue', 'Advisory Trails Revenue', 'Brokerage * Gross Revenue', 'Advisory Trails * Gross Revenue']
+    
+    values = [Total_AUM, Total_Revenue, Estimated_Gross_Value, Estimated_Adjusted_Value,
+              f'{Percent_Recurring_Rev:.2f}%', f'{Percent_Non_Recurring:.2f}%', Recurring_Rev_Multiple, Non_Recurring_Multiple, Recurring_Rev_Adjusted_Multiple, 
+              Non_Recurring_Adjusted_Rev_Multiple, proactive_Service_Model, reactive_Service_Model, growth_Last_3_Years,
+              f'{Brokerage:.2f}%', f'{Advisory_Trails:.2f}%', Brokerage_Times_NetAdRev, Advisory_Trails_Times_NetAdRev]
+    
+    table_data = list(zip(keys, values))
+
+    # Add table
+    table = Table(table_data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), HexColor("#808285")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), HexColor("#0c3c61")),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.whitesmoke),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+
+    elements.append(table)
+    pdf.build(elements)
+
+# Call function to generate PDF
+export_to_pdf(calculation_data, advisor_name)
+print("Summary Data exported to: ", calculation_output_filename)
 
 # Select only the desired columns and save to CSV
 merged_df[desired_columns].to_csv(output_file, index=False)
