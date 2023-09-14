@@ -3,8 +3,9 @@ This is an outline of using this python code to quickly do some data manipulatio
 #### 1. Install the following python packages if you dont have them already:
   - pandas
   - datetime
-  - fuzzywuzzy <br><br>
+  - fuzzywuzzy 
   - reportlab
+<br><br>
 You can install these packages by doing py -m pip install "said package". You will also need to have pip installed to be able to use the installtion method. "py" should be
 installed if you downloaded python onto your computer already. Make sure when you run the install, you are at the base directory so that you don't need to re-install any packages.
 #### 2. Once you have installed all the packages, change the following values to meet your needs:
