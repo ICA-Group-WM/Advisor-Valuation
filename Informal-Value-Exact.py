@@ -134,7 +134,7 @@ while True:
 merged_df['Advisor Ownership %'] = advisor_ownership_percent
 merged_df['Average Age'] = merged_df['Age']
 
-Recurring_Rev_Multiple = 2.8
+Recurring_Rev_Multiple = 2.5
 Percent_Recurring_Rev = 0.01
 Non_Recurring_Multiple = 1.5
 Percent_Non_Reccuring = 0.99
