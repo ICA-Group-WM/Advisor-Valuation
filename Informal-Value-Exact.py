@@ -322,17 +322,34 @@ def export_to_pdf(data, advisor_name):
     table_data = list(zip(keys, values))
 
     # Add table
+    num_rows = len(table_data)
     table = Table(table_data)
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), HexColor("#808285")),
+    table_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), HexColor("#0c3c61")),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('FONTSIZE', (0, 0), (-1, 0), 14),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), HexColor("#0c3c61")),
-        ('TEXTCOLOR', (0, 1), (-1, -1), colors.whitesmoke),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black)
-    ]))
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+    ])
+
+    # Loop through the rows and alternate the row colors dynamically
+    for row in range(1, num_rows):
+        if row % 2 == 1:  # For odd rows
+            table_style.add('BACKGROUND', (0, row), (-1, row), colors.white)
+        else:  # For even rows
+            table_style.add('BACKGROUND', (0, row), (-1, row), HexColor("#ECECEC"))
+
+    # Adding Vertical Grid Line
+    table_style.add('LINEBEFORE', (1, 0), (1, -1), 1, colors.black)
+    #Adding Horizontal Grid Line at bottom
+    table_style.add('LINEBELOW', (0, -1), (-1, -1), 1, HexColor("#27aae1"))
+
+    table.setStyle(table_style)
+
+    # Dynamically setting the column widths to make the table look neat
+    colWidths = [250, 150]  # [Width of first column, Width of second column]
+    table._argW = colWidths
 
     elements.append(table)
     pdf.build(elements)
